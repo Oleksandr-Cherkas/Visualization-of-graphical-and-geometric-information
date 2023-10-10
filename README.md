@@ -1,5 +1,7 @@
-# WebGL
+# Practical assignment #1 (Surface Rendering)
 
 Project that accompanies VGGI credit module.
 
-Visit vggi-kpi.blogspot.com for more information
+Виконав - Черкас олександр, група ТМ-32мп.
+
+Варіант 29 - Conical Surface with a Directrix Curve on a Sphere.

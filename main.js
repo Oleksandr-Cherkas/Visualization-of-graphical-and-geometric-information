@@ -86,17 +86,42 @@ function draw() {
     surface.Draw();
 }
 
-function CreateSurfaceData()
-{
+function CreateSurfaceData() {
+    const a = 10; // Значення параметра a
+    const p = 1;  // Значення параметра p
+
     let vertexList = [];
 
-    for (let i=0; i<360; i+=5) {
-        vertexList.push( Math.sin(deg2rad(i)), 1, Math.cos(deg2rad(i)) );
-        vertexList.push( Math.sin(deg2rad(i)), 0, Math.cos(deg2rad(i)) );
+    const numSteps = 100; // Кількість кроків
+    const uMin = -Math.PI;
+    const uMax = Math.PI;
+    const vMin = -a;
+    const vMax = 0;
+
+    for (let i = 0; i <= numSteps; i++) {
+        const u = uMin + (uMax - uMin) * (i / numSteps);
+
+        const v1 = vMin;
+        const v2 = vMax;
+
+        const ω1 = p * u;
+        const ω2 = p * u;
+
+        const x1 = (a + v1) * Math.cos(ω1) * Math.cos(u);
+        const y1 = (a + v1) * Math.cos(ω1) * Math.sin(u);
+        const z1 = (a + v1) * Math.sin(ω1);
+
+        const x2 = (a + v2) * Math.cos(ω2) * Math.cos(u);
+        const y2 = (a + v2) * Math.cos(ω2) * Math.sin(u);
+        const z2 = (a + v2) * Math.sin(ω2);
+
+        vertexList.push(x1, y1, z1, x2, y2, z2);
     }
 
     return vertexList;
 }
+
+
 
 
 /* Initialize the WebGL context. Called from init() */
