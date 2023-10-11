@@ -87,39 +87,40 @@ function draw() {
 }
 
 function CreateSurfaceData() {
-    const a = 10; // Значення параметра a
+    const a = 2; // Значення параметра a
     const p = 1;  // Значення параметра p
 
     let vertexList = [];
 
-    const numSteps = 100; // Кількість кроків
+    const numSteps = 30; // Кількість кроків
     const uMin = -Math.PI;
     const uMax = Math.PI;
     const vMin = -a;
     const vMax = 0;
 
-    for (let i = 0; i <= numSteps; i++) {
-        const u = uMin + (uMax - uMin) * (i / numSteps);
+    for (let i = 0; i < numSteps; i++) {
+        const u1 = uMin + (uMax - uMin) * (i / numSteps);
+        const u2 = uMin + (uMax - uMin) * ((i + 1) / numSteps);
 
-        const v1 = vMin;
-        const v2 = vMax;
+        for (let j = 0; j < numSteps; j++) {
+            const v1 = vMin + (vMax - vMin) * (j / numSteps);
 
-        const ω1 = p * u;
-        const ω2 = p * u;
+            const ω1 = p * u1;
+            const x1 = (a + v1) * Math.cos(ω1) * Math.cos(u1);
+            const y1 = (a + v1) * Math.cos(ω1) * Math.sin(u1);
+            const z1 = (a + v1) * Math.sin(ω1);
 
-        const x1 = (a + v1) * Math.cos(ω1) * Math.cos(u);
-        const y1 = (a + v1) * Math.cos(ω1) * Math.sin(u);
-        const z1 = (a + v1) * Math.sin(ω1);
+            const ω2 = p * u2;
+            const x2 = (a + v1) * Math.cos(ω2) * Math.cos(u2);
+            const y2 = (a + v1) * Math.cos(ω2) * Math.sin(u2);
+            const z2 = (a + v1) * Math.sin(ω2);
 
-        const x2 = (a + v2) * Math.cos(ω2) * Math.cos(u);
-        const y2 = (a + v2) * Math.cos(ω2) * Math.sin(u);
-        const z2 = (a + v2) * Math.sin(ω2);
-
-        vertexList.push(x1, y1, z1, x2, y2, z2);
+            vertexList.push(x1, y1, z1, x2, y2, z2, x1, y1, z1);
+        }
     }
-
     return vertexList;
 }
+
 
 
 
