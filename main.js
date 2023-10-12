@@ -2,6 +2,7 @@
 
 let gl;                         // The webgl context.
 let surface;                    // A surface model
+let surface1; 
 let shProgram;                  // A shader program
 let spaceball;                  // A SimpleRotator object that lets the user rotate the view by mouse.
 
@@ -81,20 +82,26 @@ function draw() {
     gl.uniformMatrix4fv(shProgram.iModelViewProjectionMatrix, false, modelViewProjection );
     
     /* Draw the six faces of a cube, with different colors. */
-    gl.uniform4fv(shProgram.iColor, [1,1,0,1] );
-
+    gl.uniform4fv(shProgram.iColor, [1,0,0,0] );
     surface.Draw();
+    gl.uniform4fv(shProgram.iColor, [1,1,1,1] );
+    surface1.Draw();
+    
 }
 
 function CreateSurfaceData() {
-    const a = 2; // Значення параметра a
-    const p = 1;  // Значення параметра p
+    //Побудова власне фігури
+    let a = 2;
+    let p = 1;
 
     let vertexList = [];
 
-    const numSteps = 30; // Кількість кроків
+    let numSteps = 30; // Кількість кроків
+
+    // Значення параметра u
     const uMin = -Math.PI;
     const uMax = Math.PI;
+    // Значення параметра v
     const vMin = -a;
     const vMax = 0;
 
@@ -121,9 +128,44 @@ function CreateSurfaceData() {
     return vertexList;
 }
 
+function CreateSurfaceData1() {
+    // Побудова сфери
 
+    // радіус
+    const radius = 2;
+    // кроки циклу
+    const numSteps = 20;
 
+    let vertexList = [];
 
+    // Вертикальні кола сфери
+    for (let j = 0; j <= numSteps; j++) {
+        const v = (j / numSteps) * Math.PI;
+        for (let i = 0; i <= numSteps; i++) {
+            const u = (i / numSteps) * Math.PI * 2;
+            const x = radius * Math.sin(v) * Math.cos(u);
+            const y = radius * Math.sin(v) * Math.sin(u);
+            const z = radius * Math.cos(v);
+            vertexList.push(x, y, z);
+        }
+    }
+
+    // Кола на поверхні сфери
+    for (let i = 0; i <= numSteps; i++) {
+        const u = (i / numSteps) * Math.PI * 2;
+
+        for (let j = 0; j <= numSteps; j++) {
+            const v = (j / numSteps) * Math.PI;
+            const x = radius * Math.sin(v) * Math.cos(u);
+            const y = radius * Math.sin(v) * Math.sin(u);
+            const z = radius * Math.cos(v);
+
+            vertexList.push(x, y, z);
+        }
+    }
+
+    return vertexList;
+}
 
 /* Initialize the WebGL context. Called from init() */
 function initGL() {
@@ -138,7 +180,8 @@ function initGL() {
 
     surface = new Model('Surface');
     surface.BufferData(CreateSurfaceData());
-
+    surface1 = new Model('Surface');
+    surface1.BufferData(CreateSurfaceData1());
     gl.enable(gl.DEPTH_TEST);
 }
 
