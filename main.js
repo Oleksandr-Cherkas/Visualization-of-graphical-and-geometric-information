@@ -2,7 +2,7 @@
 
 let gl;                         // The webgl context.
 let surface;                    // A surface model
-let surface1; 
+//let surface1; 
 let shProgram;                  // A shader program
 let spaceball;                  // A SimpleRotator object that lets the user rotate the view by mouse.
 
@@ -64,7 +64,7 @@ function draw() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
     /* Set the values of the projection transformation */
-    let projection = m4.perspective(Math.PI/8, 1, 8, 12); 
+    let projection = m4.orthographic(-2, 2, -2, 2, 8, 12);
     
     /* Get the view matrix from the SimpleRotator object.*/
     let modelView = spaceball.getViewMatrix();
@@ -84,8 +84,8 @@ function draw() {
     /* Draw the six faces of a cube, with different colors. */
     gl.uniform4fv(shProgram.iColor, [1,0,0,0] );
     surface.Draw();
-    gl.uniform4fv(shProgram.iColor, [1,1,1,1] );
-    surface1.Draw();
+    //gl.uniform4fv(shProgram.iColor, [1,1,1,1] );
+    //surface1.Draw();
     
 }
 
@@ -180,8 +180,8 @@ function initGL() {
 
     surface = new Model('Surface');
     surface.BufferData(CreateSurfaceData());
-    surface1 = new Model('Surface');
-    surface1.BufferData(CreateSurfaceData1());
+    //surface1 = new Model('Surface');
+    //surface1.BufferData(CreateSurfaceData1());
     gl.enable(gl.DEPTH_TEST);
 }
 
