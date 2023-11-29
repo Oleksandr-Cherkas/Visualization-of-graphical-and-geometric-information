@@ -14,23 +14,30 @@ function deg2rad(angle) {
 function Model(name) {
     this.name = name;
     this.iVertexBuffer = gl.createBuffer();
+    this.iVertexBufferNormalisation = gl.createBuffer();
     this.count = 0;
+    this.CountNormalisation = 0;
 
-    this.BufferData = function(vertices) {
+    this.BufferData = function (vertices, normals) {
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.iVertexBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STREAM_DRAW);
-
-        this.count = vertices.length/3;
+        this.count = vertices.length / 3;
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.iVertexBufferNormalisation);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STREAM_DRAW);
+        this.CountNormalisation = normals.length / 3;
     }
-
     this.Draw = function() {
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.iVertexBuffer);
         gl.vertexAttribPointer(shProgram.iAttribVertex, 3, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(shProgram.iAttribVertex);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.iVertexBufferNormalisation);
+        gl.vertexAttribPointer(shProgram.iAttribNormalVertex, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(shProgram.iAttribNormalVertex);
    
-        gl.drawArrays(gl.LINE_STRIP, 0, this.count);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.count);
     }
 }
 
@@ -43,8 +50,11 @@ function ShaderProgram(name, program) {
 
     // Location of the attribute variable in the shader program.
     this.iAttribVertex = -1;
+    this.iAttribNormalVertex = -1;
     // Location of the uniform specifying a color for the primitive.
-    this.iColor = -1;
+    this.iLightDir = -1;
+    this.iModelMatrixNormal = -1;   
+
     // Location of the uniform matrix representing the combined transformation.
     this.iModelViewProjectionMatrix = -1;
 
@@ -62,7 +72,6 @@ function draw() {
     gl.clearColor(0,0,0,1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
-    /* Set the values of the projection transformation */
     let projection = m4.orthographic(-2, 2, -2, 2, 8, 12);
     
     /* Get the view matrix from the SimpleRotator object.*/
@@ -78,12 +87,20 @@ function draw() {
        combined transformation matrix, and send that to the shader program. */
     let modelViewProjection = m4.multiply(projection, matAccum1 );
 
-    gl.uniformMatrix4fv(shProgram.iModelViewProjectionMatrix, false, modelViewProjection );
+    let inversion = m4.inverse(modelViewProjection)
+    let model_transposed = m4.transpose(inversion)
     
-    /* Draw the six faces of a cube, with different colors. */
-    gl.uniform4fv(shProgram.iColor, [1,0,0,0] );
+
+    gl.uniformMatrix4fv(shProgram.iModelViewProjectionMatrix, false, modelViewProjection );
+    gl.uniformMatrix4fv(shProgram.iModelMatrixNormal, false, model_transposed);
+    gl.uniform3fv(shProgram.iLightDir, [-0.5+1*Math.cos(Date.now() * 0.005), 0, 0])
     surface.Draw();
     
+}
+
+function draw2() {
+    draw()
+    window.requestAnimationFrame(draw2)
 }
 
 function CreateSurfaceData() {
@@ -108,6 +125,7 @@ function CreateSurfaceData() {
 
         for (let j = 0; j < numSteps; j++) {
             const v1 = vMin + (vMax - vMin) * (j / numSteps);
+            const v2 = vMin + (vMax - vMin) * ((j + 1) / numSteps);
 
             const ω1 = p * u1;
             const x1 = (a + v1) * Math.cos(ω1) * Math.cos(u1);
@@ -119,12 +137,77 @@ function CreateSurfaceData() {
             const y2 = (a + v1) * Math.cos(ω2) * Math.sin(u2);
             const z2 = (a + v1) * Math.sin(ω2);
 
-            vertexList.push(x1, y1, z1, x2, y2, z2, x1, y1, z1);
+            const x3 = (a + v2) * Math.cos(ω1) * Math.cos(u1);
+            const y3 = (a + v2) * Math.cos(ω1) * Math.sin(u1);
+            const z3 = (a + v2) * Math.sin(ω1);
+
+            vertexList.push(x2, y2, z2, x3, y3, z3, x1, y1, z1);
         }
     }
     return vertexList;
 }
 
+function creating(a, ω1, u1, v1){
+    const x1 = (a + v1) * Math.cos(ω1) * Math.cos(u1);
+    const y1 = (a + v1) * Math.cos(ω1) * Math.sin(u1);
+    const z1 = (a + v1) * Math.sin(ω1);
+    return { x: x1, y: y1, z: z1 }
+}
+
+function CreateNormal(){
+    //Побудова власне фігури
+    let a = 2;
+    let p = 1;
+
+    let normals = [];
+
+    let numSteps = 30; // Кількість кроків
+
+    // Значення параметра u
+    const uMin = -Math.PI;
+    const uMax = Math.PI;
+    // Значення параметра v
+    const vMin = -a;
+    const vMax = 0;
+    const difference = 0.05;
+
+    for (let i = 0; i < numSteps; i++) {
+        const u1 = uMin + (uMax - uMin) * (i / numSteps);
+        for (let j = 0; j < numSteps; j++) {
+            const v = vMin + (vMax - vMin) * (j / numSteps);
+            const ω1 = p * u1;
+            const v1 = creating(a, ω1, u1, v);
+            const v2 = creating(a, ω1, u1 + difference, v);
+            const v3 = creating(a, ω1, u1, v + difference);
+            const v4 = creating(a, ω1, u1 + difference, v + difference);
+
+            let v2to1 = { x: v2.x - v1.x, y: v2.y - v1.y, z: v2.z - v1.z }
+            let v3to1 = { x: v3.x - v1.x, y: v3.y - v1.y, z: v3.z - v1.z }
+            let v3to2 = { x: v3.x - v2.x, y: v3.y - v2.y, z: v3.z - v2.z }
+            let v4to2 = { x: v4.x - v2.x, y: v4.y - v2.y, z: v4.z - v2.z }
+            
+            let norma1 = crossing(v2to1, v3to1)
+            normalize(norma1)
+            let norma2 = crossing(v4to2, v3to2)
+            normalize(norma2)
+            normals.push(norma1.x, norma1.y, norma1.z, norma1.x, norma1.y, norma1.z, norma1.x,
+                norma1.y, norma1.z, norma2.x, norma2.y, norma2.z, norma2.x, norma2.y, norma2.z, norma2.x, norma2.y, norma2.z)
+        }
+    }
+    return normals;
+}
+
+function crossing(a, b) {
+    let x = a.y * b.z - b.y * a.z;
+    let y = a.z * b.x - b.z * a.x;
+    let z = a.x * b.y - b.x * a.y;
+    return { x: x, y: y, z: z }
+}
+
+function normalize(a) {
+    var mag = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+    a.x /= mag; a.y /= mag; a.z /= mag;
+}
 
 /* Initialize the WebGL context. Called from init() */
 function initGL() {
@@ -134,11 +217,20 @@ function initGL() {
     shProgram.Use();
 
     shProgram.iAttribVertex              = gl.getAttribLocation(prog, "vertex");
+
+    shProgram.iAttribNormalVertex = gl.getAttribLocation(prog, "vertexNormal");
+
+
     shProgram.iModelViewProjectionMatrix = gl.getUniformLocation(prog, "ModelViewProjectionMatrix");
-    shProgram.iColor                     = gl.getUniformLocation(prog, "color");
+    
+    shProgram.iModelMatrixNormal = gl.getUniformLocation(prog, "ModelNormalMatrix");
+
+    shProgram.iLightDir = gl.getUniformLocation(prog, "lightPosition");
 
     surface = new Model('Surface');
-    surface.BufferData(CreateSurfaceData());
+    
+    surface.BufferData(CreateSurfaceData(), CreateNormal());
+
     gl.enable(gl.DEPTH_TEST);
 }
 
@@ -203,5 +295,5 @@ function init() {
 
     spaceball = new TrackballRotator(canvas, draw, 0);
 
-    draw();
+    draw2();
 }

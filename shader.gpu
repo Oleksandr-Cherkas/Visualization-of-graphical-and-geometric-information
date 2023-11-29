@@ -3,17 +3,17 @@
 // Vertex shader
 const vertexShaderSource = `
 attribute vec3 vertex;
-attribute vec3 normal_vertex;
+attribute vec3 vertexNormal;
 uniform mat4 ModelViewProjectionMatrix;
-uniform mat4 NormalModelMatrix;
+uniform mat4 ModelNormalMatrix;
 varying vec3 normalizedVarying;
 varying vec3 vertexPosVarying;
 
 void main() {
-    vec4 vertexPos4 = ModelViewProjectionMatrix * vec4(vertex, 1.0);
-    vertexPosVarying = vec3(vertexPos4)/vertexPos4.w;
-    normalizedVarying = vec3(NormalModelMatrix*vec4(normal_vertex,0.0));
-    gl_Position = vertexPos4;
+    vec4 vertex4 = ModelViewProjectionMatrix * vec4(vertex, 1.0);
+    vertexPosVarying = vec3(vertex4)/vertex4.w;
+    normalizedVarying = vec3(ModelNormalMatrix*vec4(vertexNormal,0.0));
+    gl_Position = vertex4;
 }`;
 
 // Fragment shader
@@ -26,19 +26,18 @@ const fragmentShaderSource = `
 
 varying vec3 normalizedVarying;
 varying vec3 vertexPosVarying;
-
+uniform vec3 lightPosition;
 float Ka=1.0;
 float Kd=1.0;
 float Ks=1.0;
 float shininessVal = 80.0;
-uniform vec3 lightSpotPosition;
 vec3 ambientColor = vec3(0.05, 0.03, 0.4);
 vec3 diffuseColor = vec3(0.27, 0.72, 0.32);
 vec3 specularColor = vec3(0.0, 0.0, 0.0);
 
 void main() {
     vec3 N = normalize(normalizedVarying);
-    vec3 L = normalize(lightSpotPosition - vertexPosVarying);
+    vec3 L = normalize(lightPosition - vertexPosVarying);
     float lambertian = max(dot(N, L), 0.0);
     float specular = 0.5;
     if(lambertian > 0.0) {
