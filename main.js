@@ -98,11 +98,6 @@ function draw() {
     
 }
 
-function draw2() {
-    draw()
-    window.requestAnimationFrame(draw2)
-}
-
 function CreateSurfaceData() {
     //Побудова власне фігури
     let a = 2;
@@ -209,6 +204,11 @@ function normalize(a) {
     a.x /= mag; a.y /= mag; a.z /= mag;
 }
 
+function animating() {
+    window.requestAnimationFrame(animating)
+    draw()
+}
+
 /* Initialize the WebGL context. Called from init() */
 function initGL() {
     let prog = createProgram( gl, vertexShaderSource, fragmentShaderSource );
@@ -295,5 +295,5 @@ function init() {
 
     spaceball = new TrackballRotator(canvas, draw, 0);
 
-    draw2();
+    animating();
 }
