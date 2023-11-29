@@ -1,8 +1,8 @@
-# Practical assignment #2 (Surface Rendering)
+# Practical assignment #2
 
 **Project that accompanies VGGI credit module.**
 
-Виконав - Черкас Олександр, група ТМ-32мп.
+Виконав - Черкас Олександр, група ТР-32мп.
 
 Варіант 29 - Conical Surface with a Directrix Curve on a Sphere.
 
