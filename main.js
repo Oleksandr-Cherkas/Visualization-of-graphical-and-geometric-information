@@ -98,22 +98,21 @@ function draw() {
     
 }
 
-function getDerivativeU(a, ω1, u1, v, delta) {
-    let this1 = creating(a, ω1, u1 + delta, v);
-    let x0 = this1.x / deg2rad(delta);
-    let y0 = this1.y / deg2rad(delta);
-    let z0 = this1.z / deg2rad(delta);
+function getDerivative1(a, ω1, u1, v, delta) {
+    let [x, y, z]  = creating(a, ω1, u1 + delta, v);
+    let x0 = x / deg2rad(delta);
+    let y0 = y / deg2rad(delta);
+    let z0 = z / deg2rad(delta);
     return [x0,y0,z0];
 }
 
-function getDerivativeV(a, ω1, u1, v, delta) {
-    let this1 = creating(a, ω1, u1, v + delta);
-    let x0 = this1.x / deg2rad(delta);
-    let y0 = this1.y / deg2rad(delta);
-    let z0 = this1.z / deg2rad(delta);
+function getDerivative2(a, ω1, u1, v, delta) {
+    let [x, y, z] = creating(a, ω1, u1, v + delta);
+    let x0 = x / deg2rad(delta);
+    let y0 = y / deg2rad(delta);
+    let z0 = z / deg2rad(delta);
     return [x0,y0,z0];
 }
-
 
 function CreateSurfaceData() {
     //Побудова власне фігури
@@ -142,46 +141,32 @@ function CreateSurfaceData() {
             const v2 = vMin + (vMax - vMin) * ((j + 1) / numSteps);
 
             const ω1 = p * u1;
-            const x1 = (a + v1) * Math.cos(ω1) * Math.cos(u1);
-            const y1 = (a + v1) * Math.cos(ω1) * Math.sin(u1);
-            const z1 = (a + v1) * Math.sin(ω1);
-
-            let derU = getDerivativeU(a, ω1, u1, v1, delta);
-            let derV = getDerivativeV(a, ω1, u1, v1, delta);
-            let res = m4.cross(derU,derV);
-            // normalsList.push(res[0],res[1],res[2]);
+            let [x1, y1, z1] = creating(a, ω1, u1, v1);
+            let derivative1 = getDerivative1(a, ω1, u1, v1, delta);
+            let derivative2 = getDerivative2(a, ω1, u1, v1, delta);
+            let normal1 = m4.cross(derivative1,derivative2);
 
             const ω2 = p * u2;
-            const x2 = (a + v1) * Math.cos(ω2) * Math.cos(u2);
-            const y2 = (a + v1) * Math.cos(ω2) * Math.sin(u2);
-            const z2 = (a + v1) * Math.sin(ω2);
-
-            derU = getDerivativeU(a, ω2, u2, v1, delta);
-            derV = getDerivativeV(a, ω2, u2, v1, delta);
-            let res1 = m4.cross(derU,derV);
-            // normalsList.push(res1[0],res1[1],res1[2]);
+            let [x2, y2, z2] = creating(a, ω2, u2, v1);
+            derivative1 = getDerivative1(a, ω2, u2, v1, delta);
+            derivative2 = getDerivative2(a, ω2, u2, v1, delta);
+            let normal2 = m4.cross(derivative1,derivative2);
 
             const ω3 = p * u1;
-            const x3 = (a + v2) * Math.cos(ω3) * Math.cos(u1);
-            const y3 = (a + v2) * Math.cos(ω3) * Math.sin(u1);
-            const z3 = (a + v2) * Math.sin(ω3);
-
-            derU = getDerivativeU(a, ω3, u1, v2, delta);
-            derV = getDerivativeV(a, ω3, u1, v2, delta);
-            let res2 = m4.cross(derU,derV);
-            // normalsList.push(res2[0],res2[1],res2[2]);
+            let [x3, y3, z3] = creating(a, ω3, u1, v2);
+            derivative1 = getDerivative1(a, ω3, u1, v2, delta);
+            derivative2 = getDerivative2(a, ω3, u1, v2, delta);
+            let normal3 = m4.cross(derivative1,derivative2);
 
             const ω4 = p * u2;
-            const x4 = (a + v2) * Math.cos(ω4) * Math.cos(u2);
-            const y4 = (a + v2) * Math.cos(ω4) * Math.sin(u2);
-            const z4 = (a + v2) * Math.sin(ω4);
-            derU = getDerivativeU(a, ω4, u2, v2, delta);
-            derV = getDerivativeV(a, ω4, u2, v2, delta);
-            let res3 = m4.cross(derU,derV);
+            let [x4, y4, z4] = creating(a, ω4, u2, v2);
+            derivative1 = getDerivative1(a, ω4, u2, v2, delta);
+            derivative2 = getDerivative2(a, ω4, u2, v2, delta);
+            let normal4 = m4.cross(derivative1,derivative2);
 
-            vertexList.push(x1, y1, z1, x2, y2, z2, x3, y3, z3);
-            vertexList.push(x3, y3, z3, x2, y2, z2, x4, y4, z4);
-            normalsList.push(res[0],res[1],res[2], res1[0],res1[1],res1[2],res2[0],res2[1],res2[2],res2[0],res2[1],res2[2], res1[0],res1[1],res1[2], res3[0],res3[1],res3[2]);
+            vertexList.push(x1, y1, z1, x2, y2, z2, x3, y3, z3, x3, y3, z3, x2, y2, z2, x4, y4, z4);
+            normalsList.push(normal1[0],normal1[1],normal1[2], normal2[0],normal2[1],normal2[2],normal3[0],
+                normal3[1],normal3[2],normal3[0],normal3[1],normal3[2], normal2[0],normal2[1],normal2[2], normal4[0],normal4[1],normal4[2]);
         }
     }
     return [vertexList, normalsList];
@@ -191,62 +176,7 @@ function creating(a, ω1, u1, v1){
     const x1 = (a + v1) * Math.cos(ω1) * Math.cos(u1);
     const y1 = (a + v1) * Math.cos(ω1) * Math.sin(u1);
     const z1 = (a + v1) * Math.sin(ω1);
-    return { x: x1, y: y1, z: z1 }
-}
-
-function CreateNormal(){
-    //Побудова власне фігури
-    let a = 2;
-    let p = 1;
-
-    let normals = [];
-
-    let numSteps = 30; // Кількість кроків
-
-    // Значення параметра u
-    const uMin = -Math.PI;
-    const uMax = Math.PI;
-    // Значення параметра v
-    const vMin = -a;
-    const vMax = 0;
-    const difference = 0.05;
-
-    for (let i = 0; i < numSteps; i++) {
-        const u1 = uMin + (uMax - uMin) * (i / numSteps);
-        for (let j = 0; j < numSteps; j++) {
-            const v = vMin + (vMax - vMin) * (j / numSteps);
-            const ω1 = p * u1;
-            const v1 = creating(a, ω1, u1, v);
-            const v2 = creating(a, ω1, u1 + difference, v);
-            const v3 = creating(a, ω1, u1, v + difference);
-            const v4 = creating(a, ω1, u1 + difference, v + difference);
-
-            let v2to1 = { x: v2.x - v1.x, y: v2.y - v1.y, z: v2.z - v1.z }
-            let v3to1 = { x: v3.x - v1.x, y: v3.y - v1.y, z: v3.z - v1.z }
-            let v3to2 = { x: v3.x - v2.x, y: v3.y - v2.y, z: v3.z - v2.z }
-            let v4to2 = { x: v4.x - v2.x, y: v4.y - v2.y, z: v4.z - v2.z }
-            
-            let norma1 = crossing(v2to1, v3to1)
-            normalize(norma1)
-            let norma2 = crossing(v4to2, v3to2)
-            normalize(norma2)
-            normals.push(norma1.x, norma1.y, norma1.z, norma1.x, norma1.y, norma1.z, norma1.x,
-                norma1.y, norma1.z, norma2.x, norma2.y, norma2.z, norma2.x, norma2.y, norma2.z, norma2.x, norma2.y, norma2.z)
-        }
-    }
-    return normals;
-}
-
-function crossing(a, b) {
-    let x = a.y * b.z - b.y * a.z;
-    let y = a.z * b.x - b.z * a.x;
-    let z = a.x * b.y - b.x * a.y;
-    return { x: x, y: y, z: z }
-}
-
-function normalize(a) {
-    var mag = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
-    a.x /= mag; a.y /= mag; a.z /= mag;
+    return [x1, y1, z1]
 }
 
 function animating() {
@@ -273,9 +203,7 @@ function initGL() {
     shProgram.iLightDir = gl.getUniformLocation(prog, "lightDirection");
 
     surface = new Model('Surface');
-    
-    //surface.BufferData(CreateSurfaceData(), CreateNormal());
-    let surfaceData = CreateSurfaceData()
+    let surfaceData = CreateSurfaceData();
     surface.BufferData(surfaceData[0], surfaceData[1]);
 
     gl.enable(gl.DEPTH_TEST);
