@@ -2,6 +2,8 @@
 
 **Project that accompanies VGGI credit module.**
 
+Перероблена версія
+
 Виконав - Черкас Олександр, група ТР-32мп.
 
 Варіант 29 - Conical Surface with a Directrix Curve on a Sphere.
