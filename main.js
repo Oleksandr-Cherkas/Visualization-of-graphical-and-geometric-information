@@ -123,13 +123,13 @@ function CreateSurfaceData() {
     let normalsList =[];
     let vertexList = [];
 
-    let numSteps = 30; // Кількість кроків
+    let numSteps = 20; // Кількість кроків
 
     // Значення параметра u
     const uMin = -Math.PI;
     const uMax = Math.PI;
     // Значення параметра v
-    const vMin = -1.5;
+    const vMin = -2;
     const vMax = 0;
     let delta = 0.0001;
 
