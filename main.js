@@ -68,35 +68,50 @@ function ShaderProgram(name, program) {
  * (Note that the use of the above drawPrimitive function is not an efficient
  * way to draw with WebGL.  Here, the geometry is so simple that it doesn't matter.)
  */
+let lightSourcePos = { x: 0, y: 0, z: 0 };
+
 function draw() { 
-    gl.clearColor(0,0,0,1);
+    gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    
+
     let projection = m4.orthographic(-2, 2, -2, 2, 8, 12);
     
-    /* Get the view matrix from the SimpleRotator object.*/
+    //  матриця перегляду від об'єкта SimpleRotator.
     let modelView = spaceball.getViewMatrix();
 
-    let rotateToPointZero = m4.axisRotation([0.707,0.707,0], 0.7);
-    let translateToPointZero = m4.translation(0,0,-10);
+    let rotateToPointZero = m4.axisRotation([0.707, 0.707, 0], 0.7);
+    let translateToPointZero = m4.translation(0, 0, -10);
 
-    let matAccum0 = m4.multiply(rotateToPointZero, modelView );
-    let matAccum1 = m4.multiply(translateToPointZero, matAccum0 );
+    let matAccum0 = m4.multiply(rotateToPointZero, modelView);
+    let matAccum1 = m4.multiply(translateToPointZero, matAccum0);
         
-    /* Multiply the projection matrix times the modelview matrix to give the
-       combined transformation matrix, and send that to the shader program. */
-    let modelViewProjection = m4.multiply(projection, matAccum1 );
+    let modelViewProjection = m4.multiply(projection, matAccum1);
+    let inversion = m4.inverse(modelViewProjection);
+    let model_transposed = m4.transpose(inversion);
 
-    let inversion = m4.inverse(modelViewProjection)
-    let model_transposed = m4.transpose(inversion)
-    
-
-    gl.uniformMatrix4fv(shProgram.iModelViewProjectionMatrix, false, modelViewProjection );
+    gl.uniformMatrix4fv(shProgram.iModelViewProjectionMatrix, false, modelViewProjection);
     gl.uniformMatrix4fv(shProgram.iModelMatrixNormal, false, model_transposed);
-    gl.uniform3fv(shProgram.iLightDir, [-0.5+1*Math.cos(Date.now() * 0.005), 0, 0])
+
+    // Оновлення позиції джерела світла на параболі 4x^2
+    let time = Date.now() * 0.005;
+    lightSourcePos.x = 4 * Math.cos(time);
+    lightSourcePos.y = 4 * Math.pow(Math.cos(time), 2);
+    lightSourcePos.z = 4 * Math.sin(time);
+
+    gl.uniform3fv(shProgram.iLightDir, [lightSourcePos.x, lightSourcePos.y, lightSourcePos.z]);
+
     surface.Draw();
-    
 }
+
+// обчислює координати точки на параболі
+function computePointOnParabola(time) {
+    let x = 4 * Math.cos(time);
+    let y = 4 * Math.pow(Math.cos(time), 2);
+    let z = 4 * Math.sin(time);
+    return { x, y, z };
+}
+
+
 
 function getDerivative1(a, ω1, u1, v, delta) {
     let [x, y, z]  = creating(a, ω1, u1 + delta, v);
