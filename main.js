@@ -75,7 +75,7 @@ function draw() {
 
     let projection = m4.orthographic(-2, 2, -2, 2, 8, 12);
     
-    //  матриця перегляду від об'єкта SimpleRotator.
+    // Отримання матриці перегляду від об'єкта SimpleRotator
     let modelView = spaceball.getViewMatrix();
 
     let rotateToPointZero = m4.axisRotation([0.707, 0.707, 0], 0.7);
@@ -91,9 +91,11 @@ function draw() {
     gl.uniformMatrix4fv(shProgram.iModelViewProjectionMatrix, false, modelViewProjection);
     gl.uniformMatrix4fv(shProgram.iModelMatrixNormal, false, model_transposed);
 
-    // Оновлення позиції джерела світла на параболі 4x^2
-    let time = Date.now() * 0.003;
-    let x = 4 * Math.cos(time);
+    // Оновлення позиції джерела світла по параболі 4x^2
+    let time = Date.now() * 0.002;
+
+    // Додано коливальний рух вперед-назад
+    let x = 2 * Math.sin(time);
     let y = 4 * Math.pow(Math.cos(time), 2);
     let z = 4 * Math.sin(time);
 
@@ -101,7 +103,6 @@ function draw() {
 
     surface.Draw();
 }
-
 
 function animating() {
     window.requestAnimationFrame(animating)
@@ -132,7 +133,7 @@ function CreateSurfaceData() {
     let normalsList =[];
     let vertexList = [];
 
-    let numSteps = 20; // Кількість кроків
+    let numSteps = 80; // Кількість кроків
 
     // Значення параметра u
     const uMin = -Math.PI;
@@ -274,6 +275,6 @@ function init() {
     }
 
     spaceball = new TrackballRotator(canvas, draw, 0);
-
+    
     animating();
 }
