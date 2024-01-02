@@ -4,4 +4,4 @@
 
 Варіант 29 - Conical Surface with a Directrix Curve on a Sphere.
 
-![Image](./Texture.jpg)
+![Image](./CGW.gif)
